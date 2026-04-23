@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Guided NIPT test selector for Jeen Health — 4-stage triage funnel embedded in Webflow.",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && vite build --mode embed",
