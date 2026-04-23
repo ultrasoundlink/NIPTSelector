@@ -50,6 +50,22 @@ npm run build:embed  # dist-embed/index.html — single self-contained HTML file
 The regular build is ~48 kB JS + 8 kB CSS (~17 kB gzipped). The embed build is
 ~57 kB (~18 kB gzipped) all inlined.
 
+## Live preview
+
+- **GitHub**: [ultrasoundlink/NIPTSelector](https://github.com/ultrasoundlink/NIPTSelector)
+- **Railway (deploy target)**: [niptselector-production.up.railway.app](https://niptselector-production.up.railway.app)
+- Railway project dashboard: `railway.com/project/c2586601-d34f-4f32-bb76-90ea8590a664`
+
+Railway serves `dist/` with CORS enabled, so the same URL can be used as the CDN origin for the Webflow embed (see Option A below).
+
+### Auto-deploy on push
+
+The first deploy was uploaded via `railway up`. For subsequent pushes to auto-deploy:
+
+1. Visit [github.com/apps/railway-app](https://github.com/apps/railway-app) and grant Railway access to the `NIPTSelector` repo.
+2. In the Railway dashboard → `NIPTSelector` service → **Settings → Source** → connect the repo.
+3. From now on, `git push` triggers a new Railway build.
+
 ## Webflow embed — two paths
 
 ### Option A — host on a CDN (recommended)
