@@ -1,0 +1,7 @@
+node_modules
+dist
+dist-embed
+dist-ts
+*.log
+.DS_Store
+.vite

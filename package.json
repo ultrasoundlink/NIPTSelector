@@ -1,0 +1,30 @@
+{
+  "name": "nipt-selector",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Guided NIPT test selector for Jeen Health — 4-stage triage funnel embedded in Webflow.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && vite build --mode embed",
+    "build:embed": "tsc -b && vite build --mode embed",
+    "preview": "vite preview",
+    "start": "serve dist -l tcp://0.0.0.0:${PORT:-4173} --cors --no-clipboard",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "preact": "^10.24.3",
+    "serve": "^14.2.6"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.3",
+    "@types/node": "^22.10.2",
+    "jsdom": "^29.0.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vite-plugin-singlefile": "^2.1.0",
+    "vitest": "^2.1.8"
+  }
+}

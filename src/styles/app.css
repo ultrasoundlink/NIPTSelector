@@ -1,0 +1,543 @@
+/*
+ * All styles are scoped under .nipt-selector so the bundle is safe to drop
+ * into Webflow without leaking across the host site.
+ */
+
+.nipt-selector {
+  --nipt-bg: #fafaf7;
+  --nipt-surface: #ffffff;
+  --nipt-surface-alt: #f4f2ec;
+  --nipt-border: #e5e2d7;
+  --nipt-border-strong: #cfcabb;
+  --nipt-text: #1b1f1b;
+  --nipt-text-muted: #5d6460;
+  --nipt-accent: #2f5a4a;
+  --nipt-accent-strong: #1f3f35;
+  --nipt-accent-bg: #e8efe9;
+  --nipt-warn: #a65c2a;
+  --nipt-warn-bg: #fbeede;
+  --nipt-radius: 14px;
+  --nipt-radius-sm: 10px;
+  --nipt-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.08);
+
+  color: var(--nipt-text);
+  background: var(--nipt-bg);
+  border-radius: var(--nipt-radius);
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  max-width: 720px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.nipt-selector *,
+.nipt-selector *::before,
+.nipt-selector *::after {
+  box-sizing: border-box;
+}
+
+.nipt-selector h2,
+.nipt-selector h3 {
+  margin: 0;
+  color: var(--nipt-text);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Progress */
+.nipt-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.nipt-progress__bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--nipt-accent);
+  transition: width 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.nipt-progress::before {
+  content: "";
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--nipt-border);
+  position: relative;
+}
+.nipt-progress {
+  position: relative;
+}
+.nipt-progress__bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.nipt-progress__label {
+  font-size: 13px;
+  color: var(--nipt-text-muted);
+  padding-top: 8px;
+}
+
+/* Step shell (one question at a time, typeform-style) */
+.nipt-stage-container {
+  position: relative;
+}
+.nipt-step {
+  background: var(--nipt-surface);
+  border: 1px solid var(--nipt-border);
+  border-radius: var(--nipt-radius);
+  padding: 20px;
+  box-shadow: var(--nipt-shadow);
+  will-change: opacity, transform;
+  transition: opacity var(--nipt-leave, 160ms) ease, transform var(--nipt-leave, 160ms) ease;
+}
+.nipt-step.is-leaving {
+  opacity: 0;
+  transform: translateX(-12px);
+  pointer-events: none;
+}
+.nipt-step.is-entering {
+  animation: nipt-step-enter 240ms cubic-bezier(0.16, 0.84, 0.44, 1) both;
+}
+.nipt-step.is-idle {
+  opacity: 1;
+  transform: none;
+}
+@keyframes nipt-step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.nipt-step__label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nipt-accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.nipt-step__title {
+  font-size: 22px;
+  line-height: 1.25;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--nipt-text);
+}
+.nipt-step__subtitle {
+  font-size: 15px;
+  color: var(--nipt-text-muted);
+  margin: 0 0 12px 0;
+}
+.nipt-step__hint {
+  font-size: 14px;
+  color: var(--nipt-text-muted);
+  margin: 0 0 14px 0;
+}
+.nipt-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 10px;
+}
+.nipt-step__footer {
+  margin-top: 22px;
+}
+
+/* Question groups */
+.nipt-group {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.nipt-group__legend {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--nipt-text);
+  margin-bottom: 6px;
+}
+.nipt-group__hint {
+  font-size: 14px;
+  color: var(--nipt-text-muted);
+  margin: 0 0 12px 0;
+}
+.nipt-group__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Option cards */
+.nipt-option {
+  all: unset;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px;
+  border: 1px solid var(--nipt-border);
+  border-radius: var(--nipt-radius-sm);
+  background: var(--nipt-surface);
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 120ms ease, background 120ms ease, transform 60ms ease;
+}
+.nipt-option:hover {
+  border-color: var(--nipt-border-strong);
+}
+.nipt-option:focus-visible {
+  outline: 2px solid var(--nipt-accent);
+  outline-offset: 2px;
+}
+.nipt-option:active {
+  transform: scale(0.995);
+}
+.nipt-option.is-selected {
+  border-color: var(--nipt-accent);
+  background: var(--nipt-accent-bg);
+}
+
+.nipt-option__radio,
+.nipt-option__check {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--nipt-border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  background: var(--nipt-surface);
+  transition: border-color 120ms ease, background 120ms ease;
+  font-size: 13px;
+  color: var(--nipt-surface);
+  font-weight: 700;
+}
+.nipt-option--multi .nipt-option__check {
+  border-radius: 6px;
+}
+.nipt-option.is-selected .nipt-option__radio,
+.nipt-option.is-selected .nipt-option__check {
+  border-color: var(--nipt-accent);
+  background: var(--nipt-accent);
+}
+.nipt-option.is-selected .nipt-option__radio::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--nipt-surface);
+}
+
+.nipt-option__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.nipt-option__title {
+  font-weight: 500;
+  font-size: 15px;
+}
+.nipt-option__desc {
+  color: var(--nipt-text-muted);
+  font-size: 13.5px;
+}
+.nipt-option__tag {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--nipt-warn);
+  background: var(--nipt-warn-bg);
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Free text */
+.nipt-freetext {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+.nipt-freetext__label {
+  font-size: 13.5px;
+  color: var(--nipt-text-muted);
+}
+.nipt-freetext__input {
+  border: 1px solid var(--nipt-border);
+  border-radius: var(--nipt-radius-sm);
+  padding: 10px 12px;
+  font: inherit;
+  color: inherit;
+  background: var(--nipt-surface);
+  resize: vertical;
+  min-height: 56px;
+}
+.nipt-freetext__input:focus-visible {
+  outline: 2px solid var(--nipt-accent);
+  outline-offset: 2px;
+  border-color: var(--nipt-accent);
+}
+
+/* Nav */
+.nipt-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Buttons */
+.nipt-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 18px;
+  border-radius: var(--nipt-radius-sm);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 60ms ease;
+  text-align: center;
+  min-height: 44px;
+  line-height: 1.1;
+}
+.nipt-btn:focus-visible {
+  outline: 2px solid var(--nipt-accent);
+  outline-offset: 2px;
+}
+.nipt-btn:active {
+  transform: scale(0.985);
+}
+.nipt-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nipt-btn--primary {
+  background: var(--nipt-accent);
+  color: #fff;
+}
+.nipt-btn--primary:not([disabled]):hover {
+  background: var(--nipt-accent-strong);
+}
+.nipt-btn--ghost {
+  background: transparent;
+  color: var(--nipt-text);
+  border: 1px solid var(--nipt-border);
+}
+.nipt-btn--ghost:not([disabled]):hover {
+  border-color: var(--nipt-border-strong);
+  background: var(--nipt-surface-alt);
+}
+.nipt-btn--sm {
+  padding: 8px 12px;
+  font-size: 13.5px;
+  min-height: 36px;
+}
+
+/* Callout */
+.nipt-callout {
+  padding: 12px 14px;
+  border-radius: var(--nipt-radius-sm);
+  font-size: 14.5px;
+  border: 1px solid;
+}
+.nipt-callout--info {
+  background: var(--nipt-accent-bg);
+  border-color: #cfe0d5;
+  color: var(--nipt-accent-strong);
+}
+.nipt-callout--warn {
+  background: var(--nipt-warn-bg);
+  border-color: #efd2b1;
+  color: var(--nipt-warn);
+}
+.nipt-callout--success {
+  background: #e6f0e3;
+  border-color: #c8ddbf;
+  color: #345a28;
+}
+
+/* Result */
+.nipt-result {
+  background: var(--nipt-surface);
+  border: 1px solid var(--nipt-border);
+  border-radius: var(--nipt-radius);
+  padding: 22px;
+  box-shadow: var(--nipt-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.nipt-result__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nipt-result__kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nipt-accent);
+}
+.nipt-result__title {
+  font-size: 26px;
+  line-height: 1.2;
+}
+.nipt-result__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--nipt-text-muted);
+  font-size: 15px;
+}
+.nipt-result__price {
+  font-weight: 700;
+  color: var(--nipt-text);
+  font-size: 17px;
+}
+.nipt-result__scope {
+  margin: 4px 0 0 0;
+  color: var(--nipt-text);
+  font-size: 15.5px;
+}
+.nipt-result__note {
+  font-size: 15px;
+  color: var(--nipt-text-muted);
+  margin: 0;
+}
+
+.nipt-result__why ul,
+.nipt-caveats ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nipt-result__why h3,
+.nipt-caveats h3,
+.nipt-also h3 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--nipt-text-muted);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.nipt-also__card {
+  border: 1px solid var(--nipt-border);
+  border-radius: var(--nipt-radius-sm);
+  padding: 14px;
+  background: var(--nipt-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nipt-also__name {
+  font-weight: 600;
+}
+.nipt-also__meta {
+  color: var(--nipt-text-muted);
+  font-size: 13.5px;
+}
+.nipt-also__tradeoff {
+  margin: 4px 0 6px 0;
+  font-size: 14.5px;
+}
+
+.nipt-caveats {
+  background: var(--nipt-surface-alt);
+  border-radius: var(--nipt-radius-sm);
+  padding: 14px;
+}
+
+.nipt-midwife {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--nipt-radius-sm);
+  background: var(--nipt-accent-bg);
+  border: 1px solid #cfe0d5;
+}
+.nipt-midwife__body strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.nipt-midwife__body p {
+  margin: 0;
+  color: var(--nipt-accent-strong);
+  font-size: 14.5px;
+}
+
+.nipt-cta-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nipt-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nipt-disclaimer {
+  font-size: 12.5px;
+  color: var(--nipt-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--nipt-border);
+}
+
+/* Bigger screens: tighten the card, give the nav more breathing room. */
+@media (min-width: 720px) {
+  .nipt-selector {
+    padding: 32px;
+  }
+  .nipt-stage,
+  .nipt-result {
+    padding: 28px;
+  }
+  .nipt-stage__title {
+    font-size: 26px;
+  }
+  .nipt-midwife {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nipt-midwife .nipt-btn {
+    flex: 0 0 auto;
+  }
+}
+
+/* Respect reduced-motion requests. */
+@media (prefers-reduced-motion: reduce) {
+  .nipt-progress__bar,
+  .nipt-option,
+  .nipt-btn {
+    transition: none;
+  }
+}
