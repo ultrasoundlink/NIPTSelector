@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useAnalytics } from "./hooks/useAnalytics";
 import { useAnswers } from "./hooks/useAnswers";
 import { recommend } from "./engine/recommend";
@@ -77,20 +77,48 @@ export function App() {
     });
   }, [recommendation, send, sinceStart]);
 
+  // Refs that always point at the latest answers + stepIndex. Needed because
+  // the auto-advance timer in QuestionStep captures `advance` at click time,
+  // ~280ms before it fires — by which point closing over `answers` directly
+  // would read a stale snapshot taken before the click's onChange landed.
+  const answersRef = useRef(answers);
+  const stepIndexRef = useRef(stepIndex);
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+  useEffect(() => {
+    stepIndexRef.current = stepIndex;
+  }, [stepIndex]);
+
   // Advancing to the next step, with short-circuit handling for cases where
-  // we shouldn't bother asking more questions.
-  const advance = () => {
-    if (currentStep) {
-      send({ type: "stage_answered", stage: currentStep.stage, answer: snapshotForStep(currentStep.id, answers) });
+  // we shouldn't bother asking more questions. Reads fresh state via refs
+  // so the function reference is stable across renders.
+  const advance = useCallback(() => {
+    const a = answersRef.current;
+    const idx = stepIndexRef.current;
+    const visible = visibleSteps(a);
+    const current = idx < visible.length ? visible[idx] : undefined;
+
+    if (current) {
+      send({ type: "stage_answered", stage: current.stage, answer: snapshotForStep(current.id, a) });
     }
 
+    // Short-circuit conditions:
+    //   - Gestational age too early → wait screen.
+    //   - High-risk NHS combined / previous affected pregnancy → midwife.
+    //   - Eligibility-forced cases (twin, vanishing-twin, donor egg, surrogate)
+    //     → only one test is possible, so asking the rest is wasted time.
     const shouldShortCircuit =
-      answers.gestationalAge === "under-9" ||
-      answers.motivation === "high-risk-nhs" ||
-      (answers.historyFlags ?? []).includes("previous-affected-pregnancy");
+      a.gestationalAge === "under-9" ||
+      a.motivation === "high-risk-nhs" ||
+      (a.historyFlags ?? []).includes("previous-affected-pregnancy") ||
+      a.pregnancyType === "twin" ||
+      a.pregnancyType === "vanishing-twin" ||
+      a.conception === "donor-egg" ||
+      a.conception === "surrogate";
 
-    goToStep(shouldShortCircuit ? steps.length : clampedStep + 1);
-  };
+    goToStep(shouldShortCircuit ? visible.length : idx + 1);
+  }, [send, goToStep]);
 
   const goBack = () => {
     if (clampedStep === 0) return;
