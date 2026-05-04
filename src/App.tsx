@@ -81,14 +81,12 @@ export function App() {
   // the auto-advance timer in QuestionStep captures `advance` at click time,
   // ~280ms before it fires — by which point closing over `answers` directly
   // would read a stale snapshot taken before the click's onChange landed.
+  // Updated inline in the render body (not via useEffect) so the ref is
+  // current the moment React commits, before any timers can fire.
   const answersRef = useRef(answers);
   const stepIndexRef = useRef(stepIndex);
-  useEffect(() => {
-    answersRef.current = answers;
-  }, [answers]);
-  useEffect(() => {
-    stepIndexRef.current = stepIndex;
-  }, [stepIndex]);
+  answersRef.current = answers;
+  stepIndexRef.current = stepIndex;
 
   // Advancing to the next step, with short-circuit handling for cases where
   // we shouldn't bother asking more questions. Reads fresh state via refs
