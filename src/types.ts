@@ -90,6 +90,10 @@ export interface TestCatalogueEntry {
   eligibility: EligibilityRules;
   notable?: string; // one-line nuance shown in "also worth knowing"
   caveats: string[]; // bullets for the result screen
+  // Set to false to exclude this test from recommendations entirely while
+  // keeping it in the catalogue for type integrity. We use this for tests
+  // that aren't currently offered (e.g. Complete Plus is hard to counsel).
+  recommendable?: boolean;
 }
 
 export type ScopeTag =

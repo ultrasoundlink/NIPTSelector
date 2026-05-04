@@ -94,14 +94,6 @@ function buildConstrainedFallback(a: Answers, verdict: EligibilityVerdict): Reco
     reasons.push(
       "Important: this test must be done at least 5 weeks after the vanishing twin was seen on ultrasound. Please confirm with your midwife before booking.",
     );
-  } else if (a.pregnancyType === "twin") {
-    reasons.push(
-      "Because you told us you're carrying twins, most NIPTs in our range aren't validated for your situation. This one is.",
-    );
-  } else if (a.conception === "donor-egg" || a.conception === "surrogate") {
-    reasons.push(
-      `Because your pregnancy was conceived with a ${a.conception === "donor-egg" ? "donor egg" : "surrogate"}, most NIPTs aren't validated for your situation. This one is.`,
-    );
   }
   if (a.gestationalAge === "9-to-10" && fallback.eligibility.minGestationalBand === "10-plus") {
     reasons.push(
@@ -110,15 +102,11 @@ function buildConstrainedFallback(a: Answers, verdict: EligibilityVerdict): Reco
   }
   if (reasons.length === 0) {
     reasons.push(
-      "Your pregnancy details ruled out our narrower tests, so we're recommending the one test in our range that fits.",
+      "Your pregnancy details ruled out our narrower tests, so we're recommending the one we offer that fits.",
     );
   }
 
-  if (fallback.id === "prenatalsafe-complete-plus") {
-    reasons.push("It's our broadest screen — the main chromosome conditions, microdeletions and a monogenic panel all in one test.");
-  } else {
-    reasons.push(`It screens for the three main trisomies (Down's, Edwards', Patau's) — ${fallback.turnaroundLabel} turnaround.`);
-  }
+  reasons.push(`It screens for the three main trisomies (Down's, Edwards', Patau's) — ${fallback.turnaroundLabel} turnaround.`);
 
   return {
     primary: {
@@ -139,17 +127,19 @@ function buildConstrainedFallback(a: Answers, verdict: EligibilityVerdict): Reco
 }
 
 function pickFallbackTest(a: Answers): TestCatalogueEntry {
-  // Vanishing twin: only PrenatalSafe 3 UK is validated.
+  // Vanishing twin: only PrenatalSafe 3 UK is validated, and twin/donor-egg/
+  // surrogate are now routed to midwife before this fallback runs. So this
+  // function only deals with edge cases where eligibility filtering left a
+  // singleton with no eligible tests (rare — usually a gestational-age issue).
   if (a.pregnancyType === "vanishing-twin") return TESTS["prenatalsafe-3-uk"];
-  // Everything else falls back to Complete Plus (the test with broadest
-  // eligibility coverage — twins, donor egg, surrogate).
-  return TESTS["prenatalsafe-complete-plus"];
+  // Default: KNOVA — broadest test we recommend through this tool.
+  return TESTS["knova"];
 }
 
+// Kept for safety — Complete Plus is no longer in the eligible set, so this
+// is effectively a no-op now. Left in place so reintroducing Complete Plus in
+// future doesn't silently change rankings.
 function applyClinicalBias(scores: ScoreBreakdown[]): ScoreBreakdown[] {
-  // Only applies when KNOVA is in the eligible set. If eligibility has
-  // already removed KNOVA (twin / donor / surrogate), Complete Plus is the
-  // correct answer and no bias is wanted.
   const knovaEligible = scores.some((s) => s.testId === "knova");
   if (!knovaEligible) return scores;
   return scores.map((s) =>
@@ -176,13 +166,10 @@ function buildWhyBullets(
   const bullets: string[] = [];
 
   // Eligibility-driven bullet first — the most important signal.
-  if (a.pregnancyType === "twin" || a.pregnancyType === "vanishing-twin") {
+  // Twin / donor egg / surrogate are routed to midwife before reaching here.
+  if (a.pregnancyType === "vanishing-twin") {
     bullets.push(
-      `Because you told us you're carrying ${a.pregnancyType === "twin" ? "twins" : "a pregnancy with a vanishing twin"}, this is the test validated for your situation.`,
-    );
-  } else if (a.conception === "donor-egg" || a.conception === "surrogate") {
-    bullets.push(
-      `Because your pregnancy was conceived with a ${a.conception === "donor-egg" ? "donor egg" : "surrogate"}, this is the test validated for your situation.`,
+      "Because you told us a pregnancy with a vanishing twin was seen on scan, this is the only test in our range validated for your situation.",
     );
   } else if (eligibleCount === 1) {
     bullets.push("This is the only test in our range that fits the pregnancy details you gave us.");

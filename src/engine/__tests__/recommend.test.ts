@@ -46,7 +46,7 @@ const CASES: Case[] = [
     expect: { kind: "recommend", primary: "panorama-basic" },
   },
   {
-    name: "twins, IVF own eggs → only Complete Plus eligible",
+    name: "twins → midwife (no validated test in our recommendable set)",
     answers: {
       gestationalAge: "10-plus",
       pregnancyType: "twin",
@@ -56,10 +56,10 @@ const CASES: Case[] = [
       uncertainty: "rather-know",
       speed: "happy-to-wait",
     },
-    expect: { kind: "recommend", primary: "prenatalsafe-complete-plus" },
+    expect: { kind: "midwife" },
   },
   {
-    name: "donor egg → only Complete Plus eligible",
+    name: "donor egg → midwife (no validated test in our recommendable set)",
     answers: {
       gestationalAge: "10-plus",
       pregnancyType: "singleton",
@@ -69,7 +69,7 @@ const CASES: Case[] = [
       uncertainty: "fewer-false-alarms",
       speed: "within-2-weeks",
     },
-    expect: { kind: "recommend", primary: "prenatalsafe-complete-plus" },
+    expect: { kind: "midwife" },
   },
   {
     name: "singleton, paternal 45+, wants max info → KNOVA or Complete Plus",
@@ -85,7 +85,7 @@ const CASES: Case[] = [
     expect: {
       kind: "recommend",
       primary: "knova",
-      alsoConsiderOneOf: ["prenatalsafe-complete-plus", "niptify"],
+      alsoConsiderOneOf: ["niptify", "panorama-microdeletions", "unity-complete"],
     },
   },
   {
@@ -198,7 +198,7 @@ describe("recommend()", () => {
 });
 
 describe("recommend() — new fallback + always-two-options behaviour", () => {
-  it("twin pregnancy at 9-10 weeks still gets a real Complete Plus recommendation with an explanation", () => {
+  it("twin pregnancy at 9-10 weeks → midwife (Complete Plus is no longer recommended)", () => {
     const r = recommend({
       gestationalAge: "9-to-10",
       pregnancyType: "twin",
@@ -208,11 +208,8 @@ describe("recommend() — new fallback + always-two-options behaviour", () => {
       uncertainty: "fewer-false-alarms",
       speed: "within-2-weeks",
     });
-    expect(r.shortCircuit).toBeUndefined();
-    expect(r.primary?.test.id).toBe("prenatalsafe-complete-plus");
-    expect(r.primary!.whyBullets.length).toBeGreaterThanOrEqual(1);
-    const why = r.primary!.whyBullets.join(" ").toLowerCase();
-    expect(why).toMatch(/twin|weeks|broadest/);
+    expect(r.shortCircuit?.kind).toBe("midwife");
+    expect(r.shortCircuit?.kind === "midwife" && r.shortCircuit.reason.toLowerCase()).toMatch(/twin|midwife/);
   });
 
   it("always surfaces a second option when the patient has a real recommendation", () => {
@@ -231,10 +228,7 @@ describe("recommend() — new fallback + always-two-options behaviour", () => {
     expect(r.alsoConsider!.tradeOff.length).toBeGreaterThan(0);
   });
 
-  it("when KNOVA is eligible, Complete Plus never wins as primary (clinical bias to steer toward KNOVA)", () => {
-    // A patient who wants everything, paternal age, rather-know uncertainty,
-    // happy to wait — a profile that without the bias would tie on scope
-    // between KNOVA and Complete Plus. Must land on KNOVA.
+  it("comprehensive request → KNOVA primary, Complete Plus never appears (retired from recommendations)", () => {
     const r = recommend({
       gestationalAge: "10-plus",
       pregnancyType: "singleton",
@@ -245,13 +239,8 @@ describe("recommend() — new fallback + always-two-options behaviour", () => {
       speed: "happy-to-wait",
     });
     expect(r.primary?.test.id).toBe("knova");
-    // Complete Plus should still appear as the alternative, with the
-    // counselling-angle trade-off copy.
-    expect(r.alsoConsider?.test.id).toBe("prenatalsafe-complete-plus");
-    expect(r.alsoConsider!.tradeOff.toLowerCase()).toMatch(/counselling|conversation|follow-up/);
-    // "Preferred KNOVA over Complete Plus" bullet is surfaced.
-    const whyText = r.primary!.whyBullets.join(" ").toLowerCase();
-    expect(whyText).toContain("prefer knova");
+    expect(r.alsoConsider?.test.id).not.toBe("prenatalsafe-complete-plus");
+    expect(r.allScores.find((s) => s.testId === "prenatalsafe-complete-plus")).toBeUndefined();
   });
 
   it("vanishing twin pregnancy at 10+ weeks → PrenatalSafe 3 UK (the only validated option)", () => {
@@ -287,7 +276,7 @@ describe("recommend() — new fallback + always-two-options behaviour", () => {
     expect(why).toMatch(/vanishing twin|5 weeks|10 weeks/);
   });
 
-  it("twin pregnancy still gets Complete Plus (eligibility > clinical bias)", () => {
+  it("twin pregnancy → midwife (Complete Plus retired, no validated test in our recommendable set)", () => {
     const r = recommend({
       gestationalAge: "10-plus",
       pregnancyType: "twin",
@@ -297,7 +286,7 @@ describe("recommend() — new fallback + always-two-options behaviour", () => {
       uncertainty: "rather-know",
       speed: "happy-to-wait",
     });
-    expect(r.primary?.test.id).toBe("prenatalsafe-complete-plus");
+    expect(r.shortCircuit?.kind).toBe("midwife");
   });
 
   it("every non-short-circuit recommendation has at least 2 why-bullets", () => {
@@ -331,7 +320,7 @@ describe("recommend() — invariants", () => {
     expect(a.primary?.score.total).toBe(b.primary?.score.total);
   });
 
-  it("never recommends an ineligible test for a twin pregnancy", () => {
+  it("twin pregnancy → midwife short-circuit (no validated test in our recommendable set)", () => {
     const r = recommend({
       gestationalAge: "10-plus",
       pregnancyType: "twin",
@@ -340,10 +329,10 @@ describe("recommend() — invariants", () => {
       uncertainty: "rather-know",
       speed: "happy-to-wait",
     });
-    expect(r.primary?.test.id).toBe("prenatalsafe-complete-plus");
+    expect(r.shortCircuit?.kind).toBe("midwife");
   });
 
-  it("never recommends an ineligible test for a donor-egg pregnancy", () => {
+  it("donor-egg pregnancy → midwife short-circuit (no validated test in our recommendable set)", () => {
     const r = recommend({
       gestationalAge: "10-plus",
       pregnancyType: "singleton",
@@ -352,7 +341,23 @@ describe("recommend() — invariants", () => {
       uncertainty: "fewer-false-alarms",
       speed: "within-2-weeks",
     });
-    expect(r.primary?.test.id).toBe("prenatalsafe-complete-plus");
+    expect(r.shortCircuit?.kind).toBe("midwife");
+  });
+
+  it("Complete Plus is never returned in any recommendation", () => {
+    // Spot-check a few representative singleton profiles. None should ever
+    // surface Complete Plus as primary, alsoConsider, or in allScores.
+    const profiles: Answers[] = [
+      { gestationalAge: "10-plus", pregnancyType: "singleton", conception: "natural", motivation: "max-info", historyFlags: ["paternal-45-plus"], uncertainty: "rather-know", speed: "happy-to-wait" },
+      { gestationalAge: "10-plus", pregnancyType: "singleton", conception: "ivf-own-eggs", motivation: "specific-history", historyFlags: ["both-partners-ashkenazi"], uncertainty: "rather-know", speed: "happy-to-wait" },
+      { gestationalAge: "10-plus", pregnancyType: "singleton", conception: "natural", motivation: "main-plus-sex", historyFlags: ["none"], uncertainty: "fewer-false-alarms", speed: "within-2-weeks" },
+    ];
+    for (const a of profiles) {
+      const r = recommend(a);
+      expect(r.primary?.test.id).not.toBe("prenatalsafe-complete-plus");
+      expect(r.alsoConsider?.test.id).not.toBe("prenatalsafe-complete-plus");
+      expect(r.allScores.find((s) => s.testId === "prenatalsafe-complete-plus")).toBeUndefined();
+    }
   });
 
   it("surfaces a why bullet for every recommendation", () => {

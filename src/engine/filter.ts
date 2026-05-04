@@ -19,6 +19,10 @@ export function filterEligibleTests(answers: Answers): EligibilityVerdict {
 
   for (const id of ALL_TEST_IDS) {
     const t = TESTS[id];
+    if (t.recommendable === false) {
+      ineligibleReasons[id] = "Not currently recommended through this tool — book a midwife consult.";
+      continue;
+    }
     const reason = firstIneligibilityReason(t, answers);
     if (reason) {
       ineligibleReasons[id] = reason;
@@ -27,14 +31,31 @@ export function filterEligibleTests(answers: Answers): EligibilityVerdict {
     }
   }
 
+  // Twin / donor egg / surrogate pregnancies have no validated test in our
+  // recommendable set (Complete Plus is the only option but we don't
+  // recommend it through this tool). Route to midwife.
+  const noValidatedOption =
+    answers.pregnancyType === "twin" ||
+    answers.conception === "donor-egg" ||
+    answers.conception === "surrogate";
+
   const routeToMidwife =
     answers.motivation === "high-risk-nhs" ||
-    (answers.historyFlags ?? []).includes("previous-affected-pregnancy");
+    (answers.historyFlags ?? []).includes("previous-affected-pregnancy") ||
+    noValidatedOption;
 
   const routeToMidwifeReason = routeToMidwife
     ? answers.motivation === "high-risk-nhs"
       ? "A high-risk combined-test result needs a clinical conversation before choosing a private NIPT. Please book a midwife call — we can recommend a test during the call."
-      : "A previous pregnancy affected by a genetic condition changes the best test for you. Please speak to a midwife first — they'll help you choose."
+      : (answers.historyFlags ?? []).includes("previous-affected-pregnancy")
+        ? "A previous pregnancy affected by a genetic condition changes the best test for you. Please speak to a midwife first — they'll help you choose."
+        : answers.pregnancyType === "twin"
+          ? "Twin pregnancies need different test choices than singletons. The tests we offer through this tool aren't validated for twins. Our midwives can walk you through the right options — book a 20-minute consult."
+          : answers.conception === "donor-egg"
+            ? "Pregnancies conceived with a donor egg need different test choices. The tests we offer through this tool aren't validated for donor-egg pregnancies. Our midwives can walk you through the right options — book a 20-minute consult."
+            : answers.conception === "surrogate"
+              ? "Surrogacy pregnancies need different test choices. The tests we offer through this tool aren't validated for surrogacy. Our midwives can walk you through the right options — book a 20-minute consult."
+              : undefined
     : undefined;
 
   const routeToWait = resolveWait(answers);

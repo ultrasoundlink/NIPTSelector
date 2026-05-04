@@ -202,8 +202,14 @@ export const TESTS: Record<TestId, TestCatalogueEntry> = {
       ],
       minGestationalBand: "10-plus",
     },
+    // Not currently recommended through this tool — broad genome-wide CNVs
+    // generate too many findings that need follow-up counselling. KNOVA covers
+    // the most clinically useful subset for singletons; for twin / donor egg /
+    // surrogate pregnancies we route patients to a midwife consult instead of
+    // recommending Complete Plus.
+    recommendable: false,
     notable:
-      "The only option validated for twin pregnancies, donor-egg pregnancies and surrogacy.",
+      "Currently only available via midwife consultation (not via this self-service tool).",
     caveats: [
       "Because the panel is so broad, small numbers of flagged findings are expected that turn out to be benign after follow-up.",
       "A broad panel is not always the right answer — your midwife will help you decide if its scope matches your concerns.",
