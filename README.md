@@ -12,15 +12,19 @@ and a midwife-consult CTA.
 ## What's in the box
 
 - **8-test catalogue** (`src/config/tests.ts`) — source of truth for prices,
-  turnaround, scope tags, eligibility rules and result-screen caveats.
+  turnaround, scope tags, eligibility rules and result-screen caveats. One
+  test (PrenatalSafe Complete Plus) is flagged `recommendable: false` and
+  retired from output — it stays in the catalogue for type integrity but
+  never surfaces in a recommendation.
 - **Eligibility filter** (`src/engine/filter.ts`) — hard rules that remove
-  ineligible tests before scoring. Twins / donor eggs / surrogacy leave only
-  PrenatalSafe Complete Plus eligible; this is by design.
+  ineligible tests before scoring. Twin pregnancies / donor eggs / surrogacy
+  pregnancies have no validated test in our recommendable set, so the filter
+  routes them to a midwife consult. Vanishing twin → PrenatalSafe 3 UK with
+  a red 5-week timing banner.
 - **Scoring engine** (`src/engine/score.ts`) — pure function that scores each
-  eligible test across five weighted factors: scope match (×3), family history
-  alignment (×3), uncertainty preference (×2), speed (×2), budget proximity
-  (×1). Weights live in `src/config/weights.ts` so they can be tuned without
-  touching code.
+  eligible test across four weighted factors: scope match (×3), family history
+  alignment (×3), uncertainty preference (×2), speed (×2). Weights live in
+  `src/config/weights.ts` so they can be tuned without touching code.
 - **4-stage UI** — pregnancy facts → motivation → family history →
   preferences. Mobile-first, keyboard- and screen-reader-accessible, all
   styles scoped under `.nipt-selector` so it can't leak into Webflow.
@@ -223,12 +227,14 @@ src/
   off on the decision logic before launch.
 - **Eligibility misses.** Recommending Panorama to a twin pregnancy is worse
   than being too conservative. The filter defaults to "exclude unless
-  explicitly allowed" for each test and the Complete Plus fallback exists for
-  twin/donor/surrogate cases.
-- **Over-recommending the expensive option.** Scoring caps scope breadth at 4
-  tags for `max-info` so Complete Plus doesn't automatically win on breadth
-  over KNOVA. Monitor the recommendation distribution and the override rate
-  after launch.
+  explicitly allowed" for each test. Twin / donor egg / surrogate pregnancies
+  short-circuit straight to a midwife consult — we don't recommend Complete
+  Plus through this tool because its genome-wide CNVs are hard to counsel.
+- **Reintroducing Complete Plus.** It's flagged `recommendable: false` in
+  `src/config/tests.ts`. To re-enable, flip that flag and update the
+  midwife-routing branches in `src/engine/filter.ts` (the `noValidatedOption`
+  short-circuit). Run the full test suite — the "Complete Plus is never
+  returned" invariant will fail loudly.
 - **Edge cases** (known affected previous pregnancy, positive NHS screen,
   ambiguous family history) — all short-circuit straight to midwife. Do not
   loosen this without clinical sign-off.
