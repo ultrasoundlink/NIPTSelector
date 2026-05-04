@@ -79,7 +79,7 @@ export const STEPS: Step[] = [
     options: [
       { value: "singleton", title: "Singleton" },
       { value: "twin", title: "Twins", description: "Only one test in our range is validated for twin pregnancies." },
-      { value: "vanishing-twin", title: "Vanishing twin seen on scan" },
+      { value: "vanishing-twin", title: "Vanishing twin seen on scan", description: "Only one test in our range works for this — and it must be at least 5 weeks since the vanishing twin was seen on ultrasound." },
     ],
   },
   {

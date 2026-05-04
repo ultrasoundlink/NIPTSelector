@@ -376,6 +376,29 @@
   color: #345a28;
 }
 
+/* Red warning banner — used for clinical caveats like the vanishing-twin
+   5-week timing rule. Sits at the top of the result and demands attention. */
+.nipt-banner {
+  border-radius: var(--nipt-radius-sm);
+  padding: 14px 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nipt-banner strong {
+  font-weight: 700;
+}
+.nipt-banner p {
+  margin: 0;
+}
+.nipt-banner--warn {
+  background: #fff1ec;
+  border: 1.5px solid #c1322a;
+  color: #8b1c14;
+}
+
 /* Result */
 .nipt-result {
   background: var(--nipt-surface);

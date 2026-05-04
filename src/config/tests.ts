@@ -36,7 +36,10 @@ export const TESTS: Record<TestId, TestCatalogueEntry> = {
       "Screens for Down's, Edwards' and Patau's syndromes — with our fastest turnaround.",
     scopeTags: ["aneuploidy-13-18-21"],
     eligibility: {
-      allowedPregnancyTypes: ["singleton"],
+      // The only test in our range validated for vanishing-twin pregnancies.
+      // Important: needs ≥5 weeks since the vanishing twin was seen on scan
+      // (handled in UI via a red banner on the result screen).
+      allowedPregnancyTypes: ["singleton", "vanishing-twin"],
       allowedConceptions: ["natural", "ivf-own-eggs"],
       minGestationalBand: "10-plus",
     },
@@ -188,7 +191,9 @@ export const TESTS: Record<TestId, TestCatalogueEntry> = {
       "expanded-panel",
     ],
     eligibility: {
-      allowedPregnancyTypes: ["singleton", "twin", "vanishing-twin"],
+      // Validated for twin pregnancies, donor-egg and surrogacy. NOT for
+      // vanishing twin — only PrenatalSafe 3 UK is.
+      allowedPregnancyTypes: ["singleton", "twin"],
       allowedConceptions: [
         "natural",
         "ivf-own-eggs",

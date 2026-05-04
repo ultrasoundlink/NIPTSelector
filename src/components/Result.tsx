@@ -14,7 +14,7 @@ interface Props {
 
 const MIDWIFE_COPY = "Confirm your choice with a midwife — £50, deducted from your test.";
 
-export function Result({ recommendation: r, onRestart, onOverride, onBookMidwife }: Props) {
+export function Result({ answers, recommendation: r, onRestart, onOverride, onBookMidwife }: Props) {
   // Short-circuit routing first — these override the normal result layout.
   if (r.shortCircuit?.kind === "wait") {
     return (
@@ -76,8 +76,16 @@ export function Result({ recommendation: r, onRestart, onOverride, onBookMidwife
 
   const t = r.primary.test;
 
+  const isVanishingTwin = answers.pregnancyType === "vanishing-twin";
+
   return (
     <section className="nipt-result">
+      {isVanishingTwin && (
+        <div className="nipt-banner nipt-banner--warn" role="alert">
+          <strong>Important — vanishing twin timing rule.</strong>
+          <p>This test must be done <strong>at least 5 weeks after</strong> the vanishing twin was seen on ultrasound. If it's been less than 5 weeks, please wait and book afterwards. Your midwife will confirm timing before the test goes ahead.</p>
+        </div>
+      )}
       <div className="nipt-result__header">
         <div className="nipt-result__kicker">We recommend</div>
         <h2 className="nipt-result__title">{t.name}</h2>

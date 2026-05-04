@@ -254,6 +254,39 @@ describe("recommend() — new fallback + always-two-options behaviour", () => {
     expect(whyText).toContain("prefer knova");
   });
 
+  it("vanishing twin pregnancy at 10+ weeks → PrenatalSafe 3 UK (the only validated option)", () => {
+    const r = recommend({
+      gestationalAge: "10-plus",
+      pregnancyType: "vanishing-twin",
+      conception: "natural",
+      motivation: "max-info",
+      historyFlags: ["none"],
+      uncertainty: "rather-know",
+      speed: "happy-to-wait",
+    });
+    expect(r.shortCircuit).toBeUndefined();
+    expect(r.primary?.test.id).toBe("prenatalsafe-3-uk");
+    // Complete Plus is no longer eligible for vanishing twin, so it must NOT
+    // appear as the alternative either.
+    expect(r.alsoConsider?.test.id).not.toBe("prenatalsafe-complete-plus");
+  });
+
+  it("vanishing twin at 9-10 weeks → fallback recommends PrenatalSafe 3 UK with timing copy", () => {
+    const r = recommend({
+      gestationalAge: "9-to-10",
+      pregnancyType: "vanishing-twin",
+      conception: "natural",
+      motivation: "reassurance-main",
+      historyFlags: ["none"],
+      uncertainty: "fewer-false-alarms",
+      speed: "within-2-weeks",
+    });
+    expect(r.shortCircuit).toBeUndefined();
+    expect(r.primary?.test.id).toBe("prenatalsafe-3-uk");
+    const why = r.primary!.whyBullets.join(" ").toLowerCase();
+    expect(why).toMatch(/vanishing twin|5 weeks|10 weeks/);
+  });
+
   it("twin pregnancy still gets Complete Plus (eligibility > clinical bias)", () => {
     const r = recommend({
       gestationalAge: "10-plus",

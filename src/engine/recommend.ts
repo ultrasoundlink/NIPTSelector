@@ -81,12 +81,22 @@ export function recommend(answers: Answers): Recommendation {
 // Complete Plus (the broadest-eligibility test) with an explanation that
 // references the specific constraint the patient hit.
 function buildConstrainedFallback(a: Answers, verdict: EligibilityVerdict): Recommendation {
-  const fallback = TESTS["prenatalsafe-complete-plus"];
+  // Vanishing twin: only PrenatalSafe 3 UK is validated. Complete Plus is NOT
+  // — recommending it for vanishing twin would be wrong. Pick the right
+  // fallback per situation.
+  const fallback = pickFallbackTest(a);
   const reasons: string[] = [];
 
-  if (a.pregnancyType === "twin" || a.pregnancyType === "vanishing-twin") {
+  if (a.pregnancyType === "vanishing-twin") {
     reasons.push(
-      `Because you told us you're carrying ${a.pregnancyType === "twin" ? "twins" : "a pregnancy with a vanishing twin"}, most NIPTs in our range aren't validated for your situation. This one is.`,
+      "Because you told us a vanishing twin was seen on scan, this is the only test in our range validated for your situation.",
+    );
+    reasons.push(
+      "Important: this test must be done at least 5 weeks after the vanishing twin was seen on ultrasound. Please confirm with your midwife before booking.",
+    );
+  } else if (a.pregnancyType === "twin") {
+    reasons.push(
+      "Because you told us you're carrying twins, most NIPTs in our range aren't validated for your situation. This one is.",
     );
   } else if (a.conception === "donor-egg" || a.conception === "surrogate") {
     reasons.push(
@@ -100,12 +110,15 @@ function buildConstrainedFallback(a: Answers, verdict: EligibilityVerdict): Reco
   }
   if (reasons.length === 0) {
     reasons.push(
-      "Your pregnancy details ruled out our narrower tests, so we're recommending the one test in our range that covers every situation.",
+      "Your pregnancy details ruled out our narrower tests, so we're recommending the one test in our range that fits.",
     );
   }
 
-  // Add a clarity bullet about the broader panel.
-  reasons.push("It's our broadest screen — the main chromosome conditions, microdeletions and a monogenic panel all in one test.");
+  if (fallback.id === "prenatalsafe-complete-plus") {
+    reasons.push("It's our broadest screen — the main chromosome conditions, microdeletions and a monogenic panel all in one test.");
+  } else {
+    reasons.push(`It screens for the three main trisomies (Down's, Edwards', Patau's) — ${fallback.turnaroundLabel} turnaround.`);
+  }
 
   return {
     primary: {
@@ -123,6 +136,14 @@ function buildConstrainedFallback(a: Answers, verdict: EligibilityVerdict): Reco
     // analytics and for the result screen if it wants to flag this.
     ...(verdict.ineligibleReasons ? {} : {}),
   };
+}
+
+function pickFallbackTest(a: Answers): TestCatalogueEntry {
+  // Vanishing twin: only PrenatalSafe 3 UK is validated.
+  if (a.pregnancyType === "vanishing-twin") return TESTS["prenatalsafe-3-uk"];
+  // Everything else falls back to Complete Plus (the test with broadest
+  // eligibility coverage — twins, donor egg, surrogate).
+  return TESTS["prenatalsafe-complete-plus"];
 }
 
 function applyClinicalBias(scores: ScoreBreakdown[]): ScoreBreakdown[] {
