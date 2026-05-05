@@ -89,8 +89,13 @@ export const TESTS: Record<TestId, TestCatalogueEntry> = {
       allowedConceptions: ["natural", "ivf-own-eggs"],
       minGestationalBand: "9-to-10",
     },
+    // Not currently recommended through this tool — KNOVA / Niptify cover the
+    // useful "extended" panel space with stronger clinical signal, and the
+    // basic Panorama / PrenatalSafe / Aneuploidy options handle the narrow
+    // request. Panorama + Microdeletions sits in an awkward middle ground.
+    recommendable: false,
     notable:
-      "Adds five microdeletion syndromes — useful when you want more detail, less useful if you prefer fewer false-positive flags.",
+      "Currently only available via midwife consultation (not via this self-service tool).",
     caveats: [
       "Microdeletions are individually rare, so a positive screening result often needs a follow-up diagnostic test (CVS or amniocentesis) to confirm.",
     ],

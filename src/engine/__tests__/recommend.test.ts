@@ -85,7 +85,7 @@ const CASES: Case[] = [
     expect: {
       kind: "recommend",
       primary: "knova",
-      alsoConsiderOneOf: ["niptify", "panorama-microdeletions", "unity-complete"],
+      alsoConsiderOneOf: ["niptify", "unity-complete"],
     },
   },
   {
@@ -344,19 +344,23 @@ describe("recommend() — invariants", () => {
     expect(r.shortCircuit?.kind).toBe("midwife");
   });
 
-  it("Complete Plus is never returned in any recommendation", () => {
-    // Spot-check a few representative singleton profiles. None should ever
-    // surface Complete Plus as primary, alsoConsider, or in allScores.
+  it("retired tests (Complete Plus, Panorama+Microdeletions) never surface in any recommendation", () => {
+    // Spot-check representative singleton profiles. Neither retired test
+    // should ever appear as primary, alsoConsider, or in allScores.
     const profiles: Answers[] = [
       { gestationalAge: "10-plus", pregnancyType: "singleton", conception: "natural", motivation: "max-info", historyFlags: ["paternal-45-plus"], uncertainty: "rather-know", speed: "happy-to-wait" },
       { gestationalAge: "10-plus", pregnancyType: "singleton", conception: "ivf-own-eggs", motivation: "specific-history", historyFlags: ["both-partners-ashkenazi"], uncertainty: "rather-know", speed: "happy-to-wait" },
       { gestationalAge: "10-plus", pregnancyType: "singleton", conception: "natural", motivation: "main-plus-sex", historyFlags: ["none"], uncertainty: "fewer-false-alarms", speed: "within-2-weeks" },
+      { gestationalAge: "10-plus", pregnancyType: "singleton", conception: "natural", motivation: "specific-history", historyFlags: ["known-family-condition"], uncertainty: "rather-know", speed: "within-2-weeks" },
     ];
+    const retired = ["prenatalsafe-complete-plus", "panorama-microdeletions"] as const;
     for (const a of profiles) {
       const r = recommend(a);
-      expect(r.primary?.test.id).not.toBe("prenatalsafe-complete-plus");
-      expect(r.alsoConsider?.test.id).not.toBe("prenatalsafe-complete-plus");
-      expect(r.allScores.find((s) => s.testId === "prenatalsafe-complete-plus")).toBeUndefined();
+      for (const id of retired) {
+        expect(r.primary?.test.id).not.toBe(id);
+        expect(r.alsoConsider?.test.id).not.toBe(id);
+        expect(r.allScores.find((s) => s.testId === id)).toBeUndefined();
+      }
     }
   });
 

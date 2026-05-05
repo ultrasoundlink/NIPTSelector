@@ -12,10 +12,13 @@ and a midwife-consult CTA.
 ## What's in the box
 
 - **8-test catalogue** (`src/config/tests.ts`) — source of truth for prices,
-  turnaround, scope tags, eligibility rules and result-screen caveats. One
-  test (PrenatalSafe Complete Plus) is flagged `recommendable: false` and
-  retired from output — it stays in the catalogue for type integrity but
-  never surfaces in a recommendation.
+  turnaround, scope tags, eligibility rules and result-screen caveats. Two
+  tests are flagged `recommendable: false` and retired from output —
+  PrenatalSafe Complete Plus (hard to counsel) and Panorama with
+  Microdeletions (awkward middle ground; KNOVA / Niptify cover the extended
+  panel space better, basic Panorama / PrenatalSafe / Aneuploidy cover the
+  narrow request). They stay in the catalogue for type integrity but never
+  surface in a recommendation.
 - **Eligibility filter** (`src/engine/filter.ts`) — hard rules that remove
   ineligible tests before scoring. Twin pregnancies / donor eggs / surrogacy
   pregnancies have no validated test in our recommendable set, so the filter
@@ -230,11 +233,13 @@ src/
   explicitly allowed" for each test. Twin / donor egg / surrogate pregnancies
   short-circuit straight to a midwife consult — we don't recommend Complete
   Plus through this tool because its genome-wide CNVs are hard to counsel.
-- **Reintroducing Complete Plus.** It's flagged `recommendable: false` in
-  `src/config/tests.ts`. To re-enable, flip that flag and update the
-  midwife-routing branches in `src/engine/filter.ts` (the `noValidatedOption`
-  short-circuit). Run the full test suite — the "Complete Plus is never
-  returned" invariant will fail loudly.
+- **Reintroducing a retired test.** Both Complete Plus and Panorama with
+  Microdeletions are flagged `recommendable: false` in
+  `src/config/tests.ts`. To re-enable any of them, flip that flag. For
+  Complete Plus, also remove the `noValidatedOption` short-circuit in
+  `src/engine/filter.ts` so twin / donor egg / surrogate stops routing to
+  midwife. Run the full test suite — the "retired tests never surface"
+  invariant will fail loudly.
 - **Edge cases** (known affected previous pregnancy, positive NHS screen,
   ambiguous family history) — all short-circuit straight to midwife. Do not
   loosen this without clinical sign-off.
